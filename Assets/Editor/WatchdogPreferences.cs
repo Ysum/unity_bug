@@ -6,7 +6,7 @@ public class Startup {
 	static Startup() {
 		if (EditorPrefs.GetBool("Watchdog_Enable")) {
 			Watchdog watchdog =  Watchdog.Instance;
-
+		
 		}
 		// Debug.Log("Start!");
 

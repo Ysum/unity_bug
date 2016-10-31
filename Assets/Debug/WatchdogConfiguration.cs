@@ -11,41 +11,32 @@ using UnityEditorInternal;
 [Serializable]
 public class WatchdogConfiguration : MonoBehaviour 
 {
-
+	[SerializeField]
 	public string[] profilerProperties;
+	[SerializeField]
 	public string[] profilerPropertiesFormatted;
 
 	[SerializeField]
 	public List<PropertyWatcher> watchers;
-
-	public void Reset() {
-		FetchProfilerProperties();
-		InitializeConfiguration();
+	
+	// singleton 
+ 	[SerializeField]
+	public static WatchdogConfiguration instance = null;
+	public static WatchdogConfiguration Instance 
+	{
+		get 
+		{
+			if (instance == null) {
+				instance = GameObject.Find("Watchdog").AddComponent<WatchdogConfiguration>();
+				instance.FetchProfilerProperties();
+				instance.InitializeConfiguration();
+			}
+			return instance;
+		}
 	}
 
-	// public WatchdogConfiguration() 
-	// {
-	// 	FetchProfilerProperties();
-	// 	InitializeConfiguration();
-	// }
-	
-	// maybe: singlton pattern!
- 	// [SerializeField]
-	// public static WatchdogConfiguration config = null;
 
-
-	// public static WatchdogConfiguration Instance () {
-	// 	if (config == null) {
-	// 		config = new GameObject().AddComponent<WatchdogConfiguration>();
-	// 	}
-
-	// 	return config;
-		
-	// }
-
-
-
-	void FetchProfilerProperties() 
+	public void FetchProfilerProperties() 
 	{
 		// get all profiler properties
 		string[] allProfilerProperties = ProfilerDriver.GetAllStatisticsProperties();
@@ -71,15 +62,23 @@ public class WatchdogConfiguration : MonoBehaviour
 	public void InitializeConfiguration() 
 	{
 
-		// if (watchers == null) {
+		if (watchers == null) {
 			watchers = new List<PropertyWatcher>();
-		// }
 
-		this.AddPropertyWatcher("VSync");
-		this.AddPropertyWatcher("Triangles");
-		this.AddPropertyWatcher("Mesh Memory");
-		this.AddPropertyWatcher("GC Allocated");
-		this.AddPropertyWatcher("Contacts");
+			for (int i = 1; i <= 10; i++) {
+				PropertyWatcher pw = new PropertyWatcher();
+				pw.Slot = i;
+				watchers.Add(pw);
+			}
+
+			// this.AddPropertyWatcher("VSync");
+			// this.AddPropertyWatcher("Triangles");
+			// this.AddPropertyWatcher("Mesh Memory");
+			// this.AddPropertyWatcher("GC Allocated");
+			// this.AddPropertyWatcher("Contacts");
+		}
+
+
 
 		
 	}
@@ -91,7 +90,8 @@ public class WatchdogConfiguration : MonoBehaviour
 			bool cont = !ConfigContainsWatcher(property);
 			if (ok && cont) {
 				PropertyWatcher pw = new PropertyWatcher(property);
-				// pw.index = ProfilerPropertiesGetIndexOf(property);
+				pw.Slot = watchers.Count+1;
+				pw.Index = ProfilerPropertiesGetIndexOf(property)+1;
 				this.watchers.Add(pw);
 			} else {
 				throw new System.ArgumentException("invalid Property added to configuration.");
@@ -161,25 +161,41 @@ public class WatchdogConfiguration : MonoBehaviour
 [Serializable]
 public class PropertyWatcher {
 
+	[SerializeField]
 	private string property; 
 	public string Property 
 	{
 		get 
 		{ 
+			property = EditorPrefs.GetString("Watchdog_Slot"+Slot+"_Property");
 			return property;
 		}
 		set
 		{
 			property = value;
-			EditorPrefs.SetString("Watchdog_Slot"+Slot+"_Property", Property);
+			EditorPrefs.SetString("Watchdog_Slot"+Slot+"_Property", property);
 		} 
 	}
 
+	[SerializeField]
+	private int index; 
+	public int Index 
+	{ 
+		get 
+		{
+			index = EditorPrefs.GetInt("Watchdog_Slot"+Slot+"_Index");
+			return index;
+		} 
+		
+		set 
+		{
+			index = value;
+			EditorPrefs.SetInt("Watchdog_Slot"+Slot+"_Index", index);
 
+		}
+	}
 
-	public int Index { get; set; }
-
-	//TODO Set slot
+	[SerializeField]
 	public int Slot { get; set; }
 	
 	private bool alarmActive;
@@ -295,14 +311,9 @@ public class PropertyWatcher {
 
 	// }
 
+		//constructor
 
-
-
-
-
-		public PropertyWatcher(string s) {
-			Property = s;
-			
+		public PropertyWatcher() {
 			AlarmActive = false;
 			AlarmFreq = 0;
 			AlarmThreshold = 0;
@@ -311,6 +322,10 @@ public class PropertyWatcher {
 			VibraActive = false;
 			VibraThreshold = 0;
 			VibraThreshType = 0; // 0: alarm above or 1: below threshold
+		}
+
+		public PropertyWatcher(string s) : this() {
+			Property = s;
 
 		}
 

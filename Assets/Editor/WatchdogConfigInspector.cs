@@ -6,7 +6,7 @@ using System.Linq;
 [CustomEditor(typeof(WatchdogConfiguration))]
 public class WatchdogConfigInspector : Editor {
 
-	int[] selected = new int[10];
+	// int[] selected = new int[10];
 	bool[] foldouts = new bool[10]; 
 
 	string[] thresholdType = new string[]{">", "<"};
@@ -26,21 +26,21 @@ public class WatchdogConfigInspector : Editor {
 
 			int count = 0;
 			foreach (PropertyWatcher watcher in config.watchers) {
-				count++;
 				GUILayoutOption[] options = new GUILayoutOption[]{ GUILayout.MinWidth(100)};
-				watcher.Index = EditorGUILayout.Popup("Slot "+count, watcher.Index, config.profilerPropertiesFormatted, options);
-				watcher.Property = config.profilerProperties[selected[count]];
+				watcher.Index = EditorGUILayout.Popup("Slot "+watcher.Slot, watcher.Index, config.profilerPropertiesFormatted, options);
+				if (watcher.Index > 0) {
+					watcher.Property = config.profilerProperties[watcher.Index-1];
+				}
 				
 				EditorGUI.indentLevel++;
-				foldouts[count] = EditorGUILayout.Foldout(foldouts[count], "Options");
-				if (foldouts[count]) {
+				foldouts[count] = EditorGUILayout.Foldout(foldouts[count], "Alarm");
+				if (foldouts[count++]) {
 					// EditorGUI.indentLevel++;
 
 					//Alarm Zeile
 					EditorGUILayout.BeginHorizontal(); 
-
 						EditorGUILayout.BeginHorizontal(options);
-						EditorGUILayout.PrefixLabel("Alarm");
+						EditorGUILayout.PrefixLabel("Sound");
 						watcher.AlarmActive = EditorGUILayout.Toggle(watcher.AlarmActive);
 						EditorGUILayout.PrefixLabel("Threshold");
 						watcher.AlarmThreshType = EditorGUILayout.Popup(watcher.AlarmThreshType, thresholdType); 
@@ -73,19 +73,20 @@ public class WatchdogConfigInspector : Editor {
 				// EditorGUILayout.EndHorizontal();				
 			}
 				
-			EditorGUILayout.BeginHorizontal(); 
+			//Save??
+			// EditorGUILayout.BeginHorizontal(); 
 
-			 if (GUILayout.Button("Save Configuration")) {
-				 config.ImportConfig();
+			//  if (GUILayout.Button("Save Configuration")) {
+			// 	 config.ImportConfig();
 
-			 }
+			//  }
 
-			 if (GUILayout.Button("Load Configuration")) {
-				 config.ExportConfig();
+			//  if (GUILayout.Button("Load Configuration")) {
+			// 	 config.ExportConfig();
 
-			 }
+			//  }
 
-			EditorGUILayout.EndHorizontal();
+			// EditorGUILayout.EndHorizontal();
 		}
 
 		if (GUI.changed) {

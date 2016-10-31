@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Collections;
 using System.Text.RegularExpressions;
 
-
+[Serializable]
 public class Watchdog: MonoBehaviour {
 
 
@@ -27,24 +27,25 @@ public class Watchdog: MonoBehaviour {
 
 	public int FramesPerSec { get; protected set; }
 
+	[SerializeField]
 	private static WatchdogConfiguration config;
+	[SerializeField]
 	private static GameObject watchdog;
+	
+	[SerializeField]
 	private static Watchdog instance = null;
 	public static Watchdog Instance {
 		get {
 			if (GameObject.Find("Watchdog") == null) {
 				watchdog = new GameObject("Watchdog");
 				instance = watchdog.AddComponent<Watchdog>();
-				config = watchdog.AddComponent<WatchdogConfiguration>();
+				WatchdogConfiguration config = WatchdogConfiguration.Instance;
 
 			}
 			return instance;
 		}
 	}
 
-	private void Reset() {
-		
-	} 
 
 	private void OnEnable() {
 		host = EditorPrefs.GetString("Watchdog_Host");
