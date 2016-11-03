@@ -5,7 +5,7 @@ using UnityEditor;
 public class Startup {
 	static Startup() {
 		if (EditorPrefs.GetBool("Watchdog_Enable")) {
-			Watchdog watchdog =  Watchdog.Instance;
+			Watchdog.Init();
 		
 		}
 		// Debug.Log("Start!");
@@ -51,7 +51,7 @@ public class WatchdogPreferences : MonoBehaviour {
 			if (!enable) {
 				DestroyImmediate(GameObject.Find("Watchdog"));
 			} else {
-				Watchdog watchdog =  Watchdog.Instance;
+				Watchdog.Init();
 			}
 		}
 		

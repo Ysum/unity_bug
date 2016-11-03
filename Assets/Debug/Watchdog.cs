@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 [Serializable]
 public class Watchdog: MonoBehaviour {
 
-
 	/* Settings */
 	string host;
 	int port;
@@ -29,34 +28,40 @@ public class Watchdog: MonoBehaviour {
 
 	[SerializeField]
 	private static WatchdogConfiguration config;
+
 	[SerializeField]
 	private static GameObject watchdog;
 	
 	[SerializeField]
-	private static Watchdog instance = null;
-	public static Watchdog Instance {
-		get {
+	public static void Init() {
+
 			if (GameObject.Find("Watchdog") == null) {
 				watchdog = new GameObject("Watchdog");
-				instance = watchdog.AddComponent<Watchdog>();
-				WatchdogConfiguration config = WatchdogConfiguration.Instance;
-
+				watchdog.AddComponent<Watchdog>();
 			}
-			return instance;
-		}
+
+			config = WatchdogConfiguration.Instance;
+			config.LoadPrefs();
 	}
 
+	private void Reset() {
+
+
+	}
 
 	private void OnEnable() {
+
 		host = EditorPrefs.GetString("Watchdog_Host");
 		port = EditorPrefs.GetInt("Watchdog_Port");
 		freq = EditorPrefs.GetFloat("Watchdog_Freq");
 	}
 
 	private void Start() {
-		Init();
+		InitTransmition();
 		StartCoroutine(Frame());
 	}
+
+
 
 	private IEnumerator Frame() {
 		for(;;){
@@ -67,16 +72,16 @@ public class Watchdog: MonoBehaviour {
 			yield return new WaitForSeconds(freq);
 
 			//send OSC packages for display watch data
-			for (int i = 0; i < 8; i++) {
-				int slot = i+1;
-				// sendOSCData(slot,ProfilerProperties.GetPropertyString(WatchFigures[i]));
-
+			foreach (PropertyWatcher watcher in config.watchers) {
+				if (watcher.Index > 0) {
+					sendOSCData(watcher.Slot, watcher.Property);	
+				}
 			}
 
 		}
 	}
 
-	public void Init() {
+	public void InitTransmition() {
 		ProfilerDriver.ClearAllFrames ();
 		Profiler.enabled = true;
 		OSCHandler.Instance.Init (host, port);
@@ -102,10 +107,10 @@ public class Watchdog: MonoBehaviour {
 			string string_formatted = ProfilerDriver.GetFormattedStatisticsValue (frameIndex, guid);
 			ProfilerDriver.GetStatisticsValues(guid, 0, 1, data, out maxValue);
 
-			string extractedKeyFigure = Regex.Match(string_formatted, @"(\d*\.\d*)").Value;
+			string extractedKeyFigure = Regex.Match(string_formatted, @"(\d+\.\d*|\d+)").Value;
 			float keyFigureValue = float.Parse(extractedKeyFigure, CultureInfo.InvariantCulture);
 
-			OSCHandler.Instance.SendMessageToClient ("UnityMonitor", "/UnityWatchdog/DisplaySlot"+slot+"/"+attribute, string_formatted);
+			OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/DisplaySlot"+slot+"/"+attribute, string_formatted);
 
 			// //send alarm message if above threshold (if set)
 			// if (SoundWarningThresholds[slot-1] > 0 && keyFigureValue >= SoundWarningThresholds[slot-1]) {

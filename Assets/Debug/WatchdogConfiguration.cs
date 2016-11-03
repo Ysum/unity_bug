@@ -35,6 +35,38 @@ public class WatchdogConfiguration : MonoBehaviour
 		}
 	}
 
+	public void SavePrefs() {
+		foreach (PropertyWatcher w in watchers) {
+			if (w.Index > 0) {
+				EditorPrefs.SetString("Watchdog_Slot"+w.Slot+"_Property", w.Property);
+				EditorPrefs.SetInt("Watchdog_Slot"+w.Slot+"_Index", w.Index);
+				EditorPrefs.SetBool("Watchdog_Slot"+w.Slot+"_AlarmActive", w.AlarmActive);		
+				EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_AlarmFreq", w.AlarmFreq);		
+				EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_AlarmThreshold", w.AlarmThreshold);		
+				EditorPrefs.SetInt("Watchdog_Slot"+w.Slot+"_AlarmThreshType", w.AlarmThreshType);		
+				EditorPrefs.SetBool("Watchdog_Slot"+w.Slot+"_VibraActive", w.VibraActive);
+				EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_VibraThreshold", w.VibraThreshold);		
+				EditorPrefs.SetInt("Watchdog_Slot"+w.Slot+"_VibraThreshType", w.VibraThreshType);	
+			}	
+		} 
+	}
+
+	public void LoadPrefs() {
+		foreach (PropertyWatcher w in watchers) {
+			// if (w.Index > 0) {
+				w.Property = EditorPrefs.GetString("Watchdog_Slot"+w.Slot+"_Property");
+				w.Index = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_Index");
+				w.AlarmActive = EditorPrefs.GetBool("Watchdog_Slot"+w.Slot+"_AlarmActive");
+				w.AlarmFreq = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_AlarmFreq");
+				w.AlarmThreshold = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_AlarmThreshold");
+				w.AlarmThreshType = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_AlarmThreshType");
+				w.VibraActive = EditorPrefs.GetBool("Watchdog_Slot"+w.Slot+"_VibraActive");         
+				w.VibraThreshold = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_VibraThreshold");
+				w.VibraThreshType = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_VibraThreshType");  		
+			// }
+			
+		} 
+	}
 
 	public void FetchProfilerProperties() 
 	{
@@ -167,13 +199,11 @@ public class PropertyWatcher {
 	{
 		get 
 		{ 
-			property = EditorPrefs.GetString("Watchdog_Slot"+Slot+"_Property");
 			return property;
 		}
 		set
 		{
 			property = value;
-			EditorPrefs.SetString("Watchdog_Slot"+Slot+"_Property", property);
 		} 
 	}
 
@@ -183,14 +213,12 @@ public class PropertyWatcher {
 	{ 
 		get 
 		{
-			index = EditorPrefs.GetInt("Watchdog_Slot"+Slot+"_Index");
 			return index;
 		} 
 		
 		set 
 		{
 			index = value;
-			EditorPrefs.SetInt("Watchdog_Slot"+Slot+"_Index", index);
 
 		}
 	}
@@ -208,7 +236,6 @@ public class PropertyWatcher {
 		set
 		{
 			alarmActive = value;
-			EditorPrefs.SetBool("Watchdog_Slot"+Slot+"_AlarmActive", alarmActive);		
 			} 
 		}
 
@@ -222,7 +249,6 @@ public class PropertyWatcher {
 		set
 		{
 			alarmFreq = value;
-			EditorPrefs.SetFloat("Watchdog_Slot"+Slot+"_AlarmFreq", alarmFreq);		
 		} 
 	}
 
@@ -236,7 +262,6 @@ public class PropertyWatcher {
 		set
 		{
 			alarmThreshold = value;
-			EditorPrefs.SetFloat("Watchdog_Slot"+Slot+"_AlarmThreshold", alarmThreshold);		
 		} 
 	}
 	
@@ -250,7 +275,6 @@ public class PropertyWatcher {
 		set
 		{
 			alarmThreshType = value;
-			EditorPrefs.SetInt("Watchdog_Slot"+Slot+"_AlarmThreshType", alarmThreshType);		
 		} 
 	}
     
@@ -264,7 +288,6 @@ public class PropertyWatcher {
 		set
 		{
 			vibraActive = value;
-			EditorPrefs.SetBool("Watchdog_Slot"+Slot+"_VibraActive", vibraActive);
 		} 
 	}
 
@@ -278,7 +301,6 @@ public class PropertyWatcher {
 		set
 		{
 			vibraThreshold = value;
-			EditorPrefs.SetFloat("Watchdog_Slot"+Slot+"_VibraThreshold", vibraThreshold);		
 		} 
 	}
 
@@ -292,27 +314,11 @@ public class PropertyWatcher {
 		set
 		{
 			vibraThreshType = value;
-			EditorPrefs.SetInt("Watchdog_Slot"+Slot+"_VibraThreshType", vibraThreshType);		
 		} 
 	}
 
 
-	// public PropertyWatcher(string s) {
-	// 	Property = s;
-		
-	// 	AlarmActive = false;
-	// 	AlarmFreq = 0;
-	// 	AlarmThreshold = 0;
-	// 	AlarmThreshType = 0; // 0: alarm above or 1: below threshold
-		
-	// 	VibraActive = false;
-	// 	VibraThreshold = 0;
-	// 	VibraThreshType = 0; // 0: alarm above or 1: below threshold
-
-	// }
-
-		//constructor
-
+		// deafault constructor
 		public PropertyWatcher() {
 			AlarmActive = false;
 			AlarmFreq = 0;
@@ -323,7 +329,8 @@ public class PropertyWatcher {
 			VibraThreshold = 0;
 			VibraThreshType = 0; // 0: alarm above or 1: below threshold
 		}
-
+		
+		// string property constructor
 		public PropertyWatcher(string s) : this() {
 			Property = s;
 
