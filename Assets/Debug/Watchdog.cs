@@ -24,8 +24,6 @@ public class Watchdog: MonoBehaviour {
 	string[] statisticProperties;
 	string[] propertiesToTransmit;
 
-	public int FramesPerSec { get; protected set; }
-
 	[SerializeField]
 	private static WatchdogConfiguration config;
 
@@ -38,6 +36,7 @@ public class Watchdog: MonoBehaviour {
 			if (GameObject.Find("Watchdog") == null) {
 				watchdog = new GameObject("Watchdog");
 				watchdog.AddComponent<Watchdog>();
+
 			}
 
 			config = WatchdogConfiguration.Instance;
@@ -57,7 +56,7 @@ public class Watchdog: MonoBehaviour {
 	}
 
 	private void Start() {
-		InitTransmition();
+		PrepareTransmission();
 		StartCoroutine(Frame());
 	}
 
@@ -72,23 +71,23 @@ public class Watchdog: MonoBehaviour {
 			yield return new WaitForSeconds(freq);
 
 			//send OSC packages for display watch data
-			foreach (PropertyWatcher watcher in config.watchers) {
+			foreach (PropertyWatcher watcher in config.Watchers) {
 				if (watcher.Index > 0) {
-					sendOSCData(watcher.Slot, watcher.Property);	
+					SendOSCData(watcher.Slot, watcher.Property);	
 				}
 			}
 
 		}
 	}
 
-	public void InitTransmition() {
+	private void PrepareTransmission() {
 		ProfilerDriver.ClearAllFrames ();
 		Profiler.enabled = true;
 		OSCHandler.Instance.Init (host, port);
 		
 	}
 
-	public void sendOSCData(int slot,string attribute) {
+	private void SendOSCData(int slot,string attribute) {
 		data = new float[buffersize];
 		float maxValue = 0;
 
@@ -123,8 +122,6 @@ public class Watchdog: MonoBehaviour {
 			// 	float delta = keyFigureValue - VibraWarningThresholds[slot-1];
 			// 	OSCHandler.Instance.SendMessageToClient ("UnityMonitor", "/UnityWatchdog/Vibra"+slot, true);
 			// }
-
-			
 
 			
 		}

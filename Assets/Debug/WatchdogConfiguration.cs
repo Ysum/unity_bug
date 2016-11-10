@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEditorInternal;
+// using System.Runtime.Serialization.Formatters.Binary;
+// using System.IO;
+
 
 
 
@@ -12,25 +13,51 @@ using UnityEditorInternal;
 public class WatchdogConfiguration : MonoBehaviour 
 {
 	[SerializeField]
-	public string[] profilerProperties;
-	[SerializeField]
-	public string[] profilerPropertiesFormatted;
-
-	[SerializeField]
-	public List<PropertyWatcher> watchers;
-	
-	// singleton 
- 	[SerializeField]
-	public static WatchdogConfiguration instance = null;
-	public static WatchdogConfiguration Instance 
+	private string[] profilerProperties;
+	public string[] ProfilerProperties 
 	{
 		get 
 		{
-			if (instance == null) {
-				instance = GameObject.Find("Watchdog").AddComponent<WatchdogConfiguration>();
-				instance.FetchProfilerProperties();
-				instance.InitializeConfiguration();
-			}
+			return profilerProperties;
+		}
+	}
+	
+	[SerializeField]
+	private string[] profilerPropertiesFormatted;
+	public string[] ProfilerPropertiesFormatted 
+	{
+		get 
+		{
+			return profilerPropertiesFormatted;
+		}
+	}
+
+	[SerializeField]
+	private List<PropertyWatcher> watchers;
+	public List<PropertyWatcher> Watchers 
+	{
+		get 
+		{
+			return watchers;
+		}
+	}
+	
+	// singleton 
+	[SerializeField]
+	private static WatchdogConfiguration instance = null;
+	public static WatchdogConfiguration Instance 
+	{
+		get 
+		{	
+//			if (instance == null) {
+//				instance = (WatchdogConfiguration)FindObjectOfType(typeof(WatchdogConfiguration));
+				if (instance == null) {
+					instance = GameObject.Find("Watchdog").AddComponent<WatchdogConfiguration>();
+					instance.FetchProfilerProperties();
+					instance.InitializeConfiguration();
+				}
+				
+//			}
 			return instance;
 		}
 	}
@@ -41,7 +68,7 @@ public class WatchdogConfiguration : MonoBehaviour
 				EditorPrefs.SetString("Watchdog_Slot"+w.Slot+"_Property", w.Property);
 				EditorPrefs.SetInt("Watchdog_Slot"+w.Slot+"_Index", w.Index);
 				EditorPrefs.SetBool("Watchdog_Slot"+w.Slot+"_AlarmActive", w.AlarmActive);		
-				EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_AlarmFreq", w.AlarmFreq);		
+				// EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_AlarmFreq", w.AlarmFreq);		
 				EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_AlarmThreshold", w.AlarmThreshold);		
 				EditorPrefs.SetInt("Watchdog_Slot"+w.Slot+"_AlarmThreshType", w.AlarmThreshType);		
 				EditorPrefs.SetBool("Watchdog_Slot"+w.Slot+"_VibraActive", w.VibraActive);
@@ -53,17 +80,17 @@ public class WatchdogConfiguration : MonoBehaviour
 
 	public void LoadPrefs() {
 		foreach (PropertyWatcher w in watchers) {
-			// if (w.Index > 0) {
+			//  if (w.Index > 0) {
 				w.Property = EditorPrefs.GetString("Watchdog_Slot"+w.Slot+"_Property");
 				w.Index = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_Index");
 				w.AlarmActive = EditorPrefs.GetBool("Watchdog_Slot"+w.Slot+"_AlarmActive");
-				w.AlarmFreq = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_AlarmFreq");
+				// w.AlarmFreq = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_AlarmFreq");
 				w.AlarmThreshold = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_AlarmThreshold");
 				w.AlarmThreshType = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_AlarmThreshType");
 				w.VibraActive = EditorPrefs.GetBool("Watchdog_Slot"+w.Slot+"_VibraActive");         
 				w.VibraThreshold = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_VibraThreshold");
 				w.VibraThreshType = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_VibraThreshType");  		
-			// }
+			//  }
 			
 		} 
 	}
@@ -103,19 +130,10 @@ public class WatchdogConfiguration : MonoBehaviour
 				watchers.Add(pw);
 			}
 
-			// this.AddPropertyWatcher("VSync");
-			// this.AddPropertyWatcher("Triangles");
-			// this.AddPropertyWatcher("Mesh Memory");
-			// this.AddPropertyWatcher("GC Allocated");
-			// this.AddPropertyWatcher("Contacts");
 		}
-
-
-
-		
 	}
 
-	public bool AddPropertyWatcher(string property) 
+	private bool AddPropertyWatcher(string property) 
 	{
 		if (watchers != null) {
 			bool ok = IsValidProperty(property); 
@@ -134,42 +152,47 @@ public class WatchdogConfiguration : MonoBehaviour
 		}
 	}
 
-	public void ExportConfig() {
-		BinaryFormatter formatter = new BinaryFormatter();
-		FileStream file = File.Create(Application.persistentDataPath + "/config.dat");
+	// public void ExportConfig() 
+	// {
+	// 	BinaryFormatter formatter = new BinaryFormatter();
+	// 	FileStream file = File.Create(Application.persistentDataPath + "/config.dat");
 
-		formatter.Serialize(file, watchers);
-		file.Close();
-	}
+	// 	formatter.Serialize(file, watchers);
+	// 	file.Close();
+	// }
 
-	public void ImportConfig() {
-		if (File.Exists(Application.persistentDataPath + "/config.dat")) {
-			BinaryFormatter formatter = new BinaryFormatter();
-			FileStream file = File.Open(Application.persistentDataPath + "config.dat", FileMode.Open);
+	// public void ImportConfig() 
+	// {
+	// 	if (File.Exists(Application.persistentDataPath + "/config.dat")) {
+	// 		BinaryFormatter formatter = new BinaryFormatter();
+	// 		FileStream file = File.Open(Application.persistentDataPath + "config.dat", FileMode.Open);
 			
-			List<PropertyWatcher> loadedWatchers =  (List<PropertyWatcher>)formatter.Deserialize(file);
-			file.Close();
+	// 		List<PropertyWatcher> loadedWatchers =  (List<PropertyWatcher>)formatter.Deserialize(file);
+	// 		file.Close();
 
-			watchers = loadedWatchers;
-		}	
-	}
+	// 		watchers = loadedWatchers;
+	// 	}	
+	// }
 
 
-	public int ProfilerPropertiesGetIndexOf(string s) {
+	private int ProfilerPropertiesGetIndexOf(string property) 
+	{
 		for (int i = 0; i < profilerProperties.Length; i++) {
-			if (s.Equals(profilerProperties[i])){
+			if (property.Equals(profilerProperties[i])){
 				return i;
 			}
 		}
-		return 666;
+		throw new ArgumentException("Invalid Property");
 	}
 
-	public bool HasEntries() {
+	public bool HasEntries() 
+	{
 		return watchers != null && watchers.Count > 0;
 
 	}
 
-	bool IsValidProperty(string s) {
+	bool IsValidProperty(string s) 
+	{
 		bool result = false;
 		foreach (string property in profilerProperties) {
 			if(s.Equals(property)) {
@@ -179,7 +202,8 @@ public class WatchdogConfiguration : MonoBehaviour
 		return result;
 	}
 
-	bool ConfigContainsWatcher(string s) {
+	bool ConfigContainsWatcher(string s) 
+	{
 		foreach (PropertyWatcher watcher in watchers) {
 			if (s.Equals(watcher.Property)) {
 				return true;
@@ -239,18 +263,18 @@ public class PropertyWatcher {
 			} 
 		}
 
-	private float alarmFreq;
-	public float AlarmFreq 
-	{ 
-		get 
-		{
-			return alarmFreq;
-		} 
-		set
-		{
-			alarmFreq = value;
-		} 
-	}
+	// private float alarmFreq;
+	// public float AlarmFreq 
+	// { 
+	// 	get 
+	// 	{
+	// 		return alarmFreq;
+	// 	} 
+	// 	set
+	// 	{
+	// 		alarmFreq = value;
+	// 	} 
+	// }
 
 	private float alarmThreshold;
 	public float AlarmThreshold 
@@ -317,11 +341,10 @@ public class PropertyWatcher {
 		} 
 	}
 
-
-		// deafault constructor
+		// default constructor
 		public PropertyWatcher() {
 			AlarmActive = false;
-			AlarmFreq = 0;
+			// AlarmFreq = 0;
 			AlarmThreshold = 0;
 			AlarmThreshType = 0; // 0: alarm above or 1: below threshold
 			
@@ -331,8 +354,8 @@ public class PropertyWatcher {
 		}
 		
 		// string property constructor
-		public PropertyWatcher(string s) : this() {
-			Property = s;
+		public PropertyWatcher(string property) : this() {
+			Property = Property;
 
 		}
 

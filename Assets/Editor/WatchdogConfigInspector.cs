@@ -24,12 +24,12 @@ public class WatchdogConfigInspector : Editor {
 		int spaceAfterCol1 = 40;
 
 		int count = 0;
-		foreach (PropertyWatcher watcher in config.watchers) {
+		foreach (PropertyWatcher watcher in config.Watchers) {
 
 			// GUILayoutOption[] options = new GUILayoutOption[]{ GUILayout.MinWidth(100), GUILayout.};
-			watcher.Index = EditorGUILayout.Popup("Slot "+watcher.Slot, watcher.Index, config.profilerPropertiesFormatted);
+			watcher.Index = EditorGUILayout.Popup("Slot "+watcher.Slot, watcher.Index, config.ProfilerPropertiesFormatted);
 			if (watcher.Index > 0) {
-				watcher.Property = config.profilerProperties[watcher.Index-1];
+				watcher.Property = config.ProfilerProperties[watcher.Index-1];
 			}
 			
 			options = new GUILayoutOption[]{ GUILayout.ExpandWidth(false)};
