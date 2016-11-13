@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Collections;
-using System.Linq;
+// using System.Collections;
+// using System.Linq;
 
 [CustomEditor(typeof(WatchdogConfiguration))]
 public class WatchdogConfigInspector : Editor {
@@ -10,6 +10,8 @@ public class WatchdogConfigInspector : Editor {
 	bool[] foldouts = new bool[10]; 
 
 	string[] thresholdType = new string[]{">", "<"};
+	string[] notes = new string[]{"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
+	float[] notesFreq = new float[]{440, 466.2f, 493.9f, 523.3f, 554.4f, 587.3f, 622.3f, 659.3f, 698.5f, 740, 784, 830.6f};
 
 
 	public override void OnInspectorGUI() {
@@ -21,7 +23,9 @@ public class WatchdogConfigInspector : Editor {
 
 		GUILayoutOption[] options;			
 		int labelWidthCol1 = 40; 
-		int spaceAfterCol1 = 40;
+		int spaceAfterCol1 = 0;
+		int toggleSpace = 25; 
+
 
 		int count = 0;
 		foreach (PropertyWatcher watcher in config.Watchers) {
@@ -33,7 +37,17 @@ public class WatchdogConfigInspector : Editor {
 			}
 			
 			options = new GUILayoutOption[]{ GUILayout.ExpandWidth(false)};
-			GUILayoutOption fixedWidth = GUILayout.Width(EditorGUIUtility.currentViewWidth);				
+			GUILayoutOption fixedWidth = GUILayout.Width(EditorGUIUtility.currentViewWidth);	
+
+			// EditorGUILayout.BeginHorizontal();
+			// GUILayout.Label();
+			EditorGUILayout.LabelField("Current Value:", "65 ms");	
+			// EditorGUILayout.EndHorizontal();			
+		
+			// EditorGUILayout.BeginHorizontal();		
+			// GUILayout.Label();
+			EditorGUILayout.LabelField("Max Value", "65 ms");
+			// EditorGUILayout.EndHorizontal();			
 
 			EditorGUI.indentLevel++;
 			foldouts[count] = EditorGUILayout.Foldout(foldouts[count], "Alarm");
@@ -46,21 +60,23 @@ public class WatchdogConfigInspector : Editor {
 					//Alarm Zeile
 					EditorGUILayout.BeginHorizontal(GUILayout.Width (120));
 						GUILayout.Label("Sound", GUILayout.Width(labelWidthCol1));
-						watcher.AlarmActive = EditorGUILayout.Toggle(watcher.AlarmActive);
+						watcher.SoundActive = EditorGUILayout.Toggle(watcher.SoundActive, GUILayout.Width(toggleSpace));
 						GUILayout.Space(spaceAfterCol1);
 						GUILayout.Label("Threshold");
-						watcher.AlarmThreshType = EditorGUILayout.Popup(watcher.AlarmThreshType, thresholdType, GUILayout.Width(50)); 
-						watcher.AlarmThreshold = EditorGUILayout.FloatField(1.8f);
+						watcher.SoundThreshType = EditorGUILayout.Popup(watcher.SoundThreshType, thresholdType, GUILayout.Width(50)); 
+						watcher.SoundThreshold = EditorGUILayout.FloatField(watcher.SoundThreshold);
+						GUILayout.Label("Note");
+						watcher.SoundNote = EditorGUILayout.Popup(watcher.SoundNote, notes, GUILayout.Width(50)); 
 					EditorGUILayout.EndHorizontal();
 
 					//Vibra Zeile
 					EditorGUILayout.BeginHorizontal(GUILayout.Width (120));
 						GUILayout.Label("Vibra", GUILayout.Width(labelWidthCol1));
-						watcher.VibraActive = EditorGUILayout.Toggle(watcher.VibraActive);
+						watcher.VibraActive = EditorGUILayout.Toggle(watcher.VibraActive, GUILayout.Width(toggleSpace));
 						GUILayout.Space(spaceAfterCol1);
 						GUILayout.Label("Threshold");
 						watcher.VibraThreshType = EditorGUILayout.Popup(watcher.VibraThreshType, thresholdType, GUILayout.Width(50)); 
-						watcher.VibraThreshold = EditorGUILayout.FloatField(1.8f);
+						watcher.VibraThreshold = EditorGUILayout.FloatField(watcher.VibraThreshold);
 					EditorGUILayout.EndHorizontal();
 				EditorGUILayout.EndVertical();
 			EditorGUILayout.EndHorizontal();

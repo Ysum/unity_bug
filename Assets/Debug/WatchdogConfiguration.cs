@@ -64,17 +64,17 @@ public class WatchdogConfiguration : MonoBehaviour
 
 	public void SavePrefs() {
 		foreach (PropertyWatcher w in watchers) {
-			if (w.Index > 0) {
+			// if (w.Index > 0) {
 				EditorPrefs.SetString("Watchdog_Slot"+w.Slot+"_Property", w.Property);
 				EditorPrefs.SetInt("Watchdog_Slot"+w.Slot+"_Index", w.Index);
-				EditorPrefs.SetBool("Watchdog_Slot"+w.Slot+"_AlarmActive", w.AlarmActive);		
-				// EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_AlarmFreq", w.AlarmFreq);		
-				EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_AlarmThreshold", w.AlarmThreshold);		
-				EditorPrefs.SetInt("Watchdog_Slot"+w.Slot+"_AlarmThreshType", w.AlarmThreshType);		
+				EditorPrefs.SetBool("Watchdog_Slot"+w.Slot+"_SoundActive", w.SoundActive);		
+				// EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_AlarmFreq", w.SoundFreq);		
+				EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_SoundThreshold", w.SoundThreshold);		
+				EditorPrefs.SetInt("Watchdog_Slot"+w.Slot+"_SoundThreshType", w.SoundThreshType);		
 				EditorPrefs.SetBool("Watchdog_Slot"+w.Slot+"_VibraActive", w.VibraActive);
 				EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_VibraThreshold", w.VibraThreshold);		
 				EditorPrefs.SetInt("Watchdog_Slot"+w.Slot+"_VibraThreshType", w.VibraThreshType);	
-			}	
+			// }	
 		} 
 	}
 
@@ -83,10 +83,10 @@ public class WatchdogConfiguration : MonoBehaviour
 			//  if (w.Index > 0) {
 				w.Property = EditorPrefs.GetString("Watchdog_Slot"+w.Slot+"_Property");
 				w.Index = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_Index");
-				w.AlarmActive = EditorPrefs.GetBool("Watchdog_Slot"+w.Slot+"_AlarmActive");
-				// w.AlarmFreq = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_AlarmFreq");
-				w.AlarmThreshold = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_AlarmThreshold");
-				w.AlarmThreshType = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_AlarmThreshType");
+				w.SoundActive = EditorPrefs.GetBool("Watchdog_Slot"+w.Slot+"_SoundActive");
+				// w.AlarmFreq = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_SoundFreq");
+				w.SoundThreshold = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_SoundThreshold");
+				w.SoundThreshType = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_SoundThreshType");
 				w.VibraActive = EditorPrefs.GetBool("Watchdog_Slot"+w.Slot+"_VibraActive");         
 				w.VibraThreshold = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_VibraThreshold");
 				w.VibraThreshType = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_VibraThreshType");  		
@@ -250,55 +250,68 @@ public class PropertyWatcher {
 	[SerializeField]
 	public int Slot { get; set; }
 	
-	private bool alarmActive;
-	public bool AlarmActive 
+	private bool soundActive;
+	public bool SoundActive 
 	{ 
 		get 
 		{
-			return alarmActive;
+			return soundActive;
 		} 
 		set
 		{
-			alarmActive = value;
+			soundActive = value;
 			} 
 		}
 
-	// private float alarmFreq;
-	// public float AlarmFreq 
+	// private float soundFreq;
+	// public float SoundFreq 
 	// { 
 	// 	get 
 	// 	{
-	// 		return alarmFreq;
+	// 		return soundFreq;
 	// 	} 
 	// 	set
 	// 	{
-	// 		alarmFreq = value;
+	// 		soundFreq = value;
 	// 	} 
 	// }
 
-	private float alarmThreshold;
-	public float AlarmThreshold 
+	private int soundNote;
+	public int SoundNote 
 	{ 
 		get 
 		{
-			return alarmThreshold;
+			return soundNote;
 		} 
 		set
 		{
-			alarmThreshold = value;
+			soundNote = value;
+		} 
+	}
+
+	private float soundThreshold;
+	public float SoundThreshold 
+	{ 
+		get 
+		{
+			return soundThreshold;
+		} 
+		set
+		{
+			soundThreshold = value;
 		} 
 	}
 	
-	private int alarmThreshType;
-	public int AlarmThreshType 
+	private int soundThreshType;
+	public int SoundThreshType 
 	{ 
 		get 
 		{
-			return alarmThreshType;
+			return soundThreshType;
 		} 
 		set
 		{
-			alarmThreshType = value;
+			soundThreshType = value;
 		} 
 	}
     
@@ -343,10 +356,10 @@ public class PropertyWatcher {
 
 		// default constructor
 		public PropertyWatcher() {
-			AlarmActive = false;
-			// AlarmFreq = 0;
-			AlarmThreshold = 0;
-			AlarmThreshType = 0; // 0: alarm above or 1: below threshold
+			SoundActive = false;
+			// SoundFreq = 0;
+			SoundThreshold = 0;
+			SoundThreshType = 0; // 0: alarm above or 1: below threshold
 			
 			VibraActive = false;
 			VibraThreshold = 0;

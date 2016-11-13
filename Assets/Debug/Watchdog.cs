@@ -73,7 +73,7 @@ public class Watchdog: MonoBehaviour {
 			//send OSC packages for display watch data
 			foreach (PropertyWatcher watcher in config.Watchers) {
 				if (watcher.Index > 0) {
-					SendOSCData(watcher.Slot, watcher.Property);	
+					SendOSCData(watcher);	
 				}
 			}
 
@@ -87,15 +87,16 @@ public class Watchdog: MonoBehaviour {
 		
 	}
 
-	private void SendOSCData(int slot,string attribute) {
+	private void SendOSCData(PropertyWatcher watcher) {
 		data = new float[buffersize];
 		float maxValue = 0;
 
 		int frameIndex = ProfilerDriver.GetPreviousFrameIndex(0);
 		int guid = -1;
 
+		//get property identifier
 		try {
-			guid = ProfilerDriver.GetStatisticsIdentifier(attribute);
+			guid = ProfilerDriver.GetStatisticsIdentifier(watcher.Property);
 		}
 		catch (Exception e) {
 			Debug.Log (e.ToString ());
@@ -109,7 +110,31 @@ public class Watchdog: MonoBehaviour {
 			string extractedKeyFigure = Regex.Match(string_formatted, @"(\d+\.\d*|\d+)").Value;
 			float keyFigureValue = float.Parse(extractedKeyFigure, CultureInfo.InvariantCulture);
 
-			OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/DisplaySlot"+slot+"/"+attribute, string_formatted);
+			//send display message
+			OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/Slot"+watcher.Index+"/Display/"+watcher.Property, string_formatted);
+
+			//send sound frequency if set
+			if (watcher.SoundNote > 0) {
+				OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/Slot"+watcher.Index+"/Sound/Freq", watcher.SoundNote);
+			}
+
+			//sound alarm active
+			if (watcher.SoundActive) {
+				if (watcher.SoundThreshType == 0) {
+
+				} else if (watcher.SoundThreshType == 1) {
+
+				}
+
+			}
+
+			//vibra alarm active
+			if (watcher.VibraActive) {
+				if (watcher.VibraThreshType == 0 && keyFigureValue > watcher.VibraThreshold || watcher.VibraThreshType == 1 && keyFigureValue < watcher.VibraThreshold) {
+					Debug.Log("OSC message sent: vibra");
+					OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/Slot"+watcher.Index+"/Vibra", "");
+				}
+			}
 
 			// //send alarm message if above threshold (if set)
 			// if (SoundWarningThresholds[slot-1] > 0 && keyFigureValue >= SoundWarningThresholds[slot-1]) {
