@@ -39,21 +39,12 @@ public class Watchdog: MonoBehaviour {
 
 	[SerializeField]
 	private WatchdogConfiguration config;
-	// private static PropertyWatcherList config;
 
 	
 	[SerializeField]
 	public void Init() {
 		config = WatchdogConfiguration.Instance;
-		Debug.Log(config.Watchers);
 		config.LoadPrefs();
-
-	}
-
-	private void Reset() {
-		// config.LoadPrefs();
-		// config = WatchdogConfiguration.Instance;
-		// Debug.Log(config);
 
 	}
 
@@ -69,8 +60,6 @@ public class Watchdog: MonoBehaviour {
 		StartCoroutine(Frame());
 
 	}
-
-
 
 	private IEnumerator Frame() {
 		for(;;){
@@ -96,9 +85,6 @@ public class Watchdog: MonoBehaviour {
 	}
 
 	private void SendOSCData(PropertyWatcher watcher) {
-		int i = ProfilerDriver.GetPreviousFrameIndex(0);
-		string s = ProfilerDriver.GetOverviewText(ProfilerArea.CPU, i);
-
 		data = new float[buffersize];
 		float maxValue = 0;
 
@@ -122,43 +108,29 @@ public class Watchdog: MonoBehaviour {
 			float keyFigureValue = float.Parse(extractedKeyFigure, CultureInfo.InvariantCulture);
 
 			//send display message
-			OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/Slot"+watcher.Index+"/Display/"+watcher.Property, string_formatted);
+			OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/Slot"+watcher.Slot+"/Display/"+watcher.Property, string_formatted);
 
 			//send sound frequency if set
 			if (watcher.SoundNote > 0) {
-				OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/Slot"+watcher.Index+"/Sound/Freq", watcher.SoundNote);
+				OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/Slot"+watcher.Slot+"/Sound/Freq", watcher.SoundNote);
 			}
 
 			//sound alarm active
 			if (watcher.SoundActive) {
-				if (watcher.SoundThreshType == 0) {
-
-				} else if (watcher.SoundThreshType == 1) {
-
-				}
-
+				if (watcher.SoundThreshType == 0 && keyFigureValue > watcher.SoundThreshold || watcher.SoundThreshType == 1 && keyFigureValue < watcher.SoundThreshold) {
+					OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/Slot"+watcher.Slot+"/Sound/Interval", 300);
+				} else if (watcher.SoundThreshType == 0 && keyFigureValue <= watcher.SoundThreshold || watcher.SoundThreshType == 1 && keyFigureValue >= watcher.SoundThreshold) {
+					OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/Slot"+watcher.Slot+"/Sound/Interval", 0);
+				} 
 			}
 
 			//vibra alarm active
 			if (watcher.VibraActive) {
 				if (watcher.VibraThreshType == 0 && keyFigureValue > watcher.VibraThreshold || watcher.VibraThreshType == 1 && keyFigureValue < watcher.VibraThreshold) {
-					Debug.Log("OSC message sent: vibra");
-					OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/Slot"+watcher.Index+"/Vibra", "");
+					// Debug.Log("OSC message sent: vibra");
+					OSCHandler.Instance.SendMessageToClient ("Watchdog", "/UnityWatchdog/Slot"+watcher.Slot+"/Vibra", "");
 				}
 			}
-
-			// //send alarm message if above threshold (if set)
-			// if (SoundWarningThresholds[slot-1] > 0 && keyFigureValue >= SoundWarningThresholds[slot-1]) {
-			// 	float delta = keyFigureValue - SoundWarningThresholds[slot-1];
-			// 	OSCHandler.Instance.SendMessageToClient ("UnityMonitor", "/UnityWatchdog/Alarm"+slot+"/Delta/", delta);
-			// }
-
-			// //send vibra message if above threshold (if set)
-			// if (VibraWarningThresholds[slot-1] > 0 && keyFigureValue >= VibraWarningThresholds[slot-1]) {
-			// 	float delta = keyFigureValue - VibraWarningThresholds[slot-1];
-			// 	OSCHandler.Instance.SendMessageToClient ("UnityMonitor", "/UnityWatchdog/Vibra"+slot, true);
-			// }
-
 			
 		}
 	}

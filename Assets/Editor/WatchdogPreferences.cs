@@ -39,10 +39,11 @@ public class WatchdogPreferences : MonoBehaviour {
 			if (!enable) {
 				DestroyImmediate(GameObject.Find("Watchdog"));
 			} else {
-				if (GameObject.Find("Watchdog") == null) {
+				if(!GameObject.Find("Watchdog")) {
 					GameObject watchdog = new GameObject("Watchdog");
 					watchdog.AddComponent<Watchdog>().Init();
-			}	
+				}
+				
 			}
 		}
 		

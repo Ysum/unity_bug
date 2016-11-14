@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
-using System.Collections.Generic;
 using UnityEditorInternal;
 // using System.Runtime.Serialization.Formatters.Binary;
 // using System.IO;
@@ -29,16 +28,6 @@ public class WatchdogConfiguration : MonoBehaviour
 			return profilerPropertiesFormatted;
 		}
 	}
-
-	// private PropertyWatcherList config;
-	// public PropertyWatcherList Config
-	// {
-	// 	get 
-	// 	{
-	// 		LoadPrefs();
-	// 		return config;
-	// 	}
-	// }
 	
 	[SerializeField]
 	private PropertyWatcher[] watchers;	
@@ -49,7 +38,6 @@ public class WatchdogConfiguration : MonoBehaviour
 			return watchers;
 		}
 	}
-
 
 	[SerializeField]
 	private static WatchdogConfiguration instance = null;
@@ -76,12 +64,6 @@ public class WatchdogConfiguration : MonoBehaviour
 		}
 	}
 
-	// void Reset() {
-	// 	if (config == null) {
-	// 		config = ScriptableObject.CreateInstance<PropertyWatcherList>();
-	// 	}
-	// }
-
 	public void clearPrefs() 
 	{
 		instance.watchers = null;
@@ -95,7 +77,7 @@ public class WatchdogConfiguration : MonoBehaviour
 				EditorPrefs.SetString("Watchdog_Slot"+w.Slot+"_Property", w.Property);
 				EditorPrefs.SetInt("Watchdog_Slot"+w.Slot+"_Index", w.Index);
 				EditorPrefs.SetBool("Watchdog_Slot"+w.Slot+"_SoundActive", w.SoundActive);		
-				// EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_AlarmFreq", w.SoundFreq);		
+				EditorPrefs.SetInt("Watchdog_Slot"+w.Slot+"_AlarmFreq", w.SoundNote);		
 				EditorPrefs.SetFloat("Watchdog_Slot"+w.Slot+"_SoundThreshold", w.SoundThreshold);		
 				EditorPrefs.SetInt("Watchdog_Slot"+w.Slot+"_SoundThreshType", w.SoundThreshType);		
 				EditorPrefs.SetBool("Watchdog_Slot"+w.Slot+"_VibraActive", w.VibraActive);
@@ -112,7 +94,7 @@ public class WatchdogConfiguration : MonoBehaviour
 				w.Property = EditorPrefs.GetString("Watchdog_Slot"+w.Slot+"_Property");
 				w.Index = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_Index");
 				w.SoundActive = EditorPrefs.GetBool("Watchdog_Slot"+w.Slot+"_SoundActive");
-				// w.AlarmFreq = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_SoundFreq");
+				w.SoundNote = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_SoundNote");
 				w.SoundThreshold = EditorPrefs.GetFloat("Watchdog_Slot"+w.Slot+"_SoundThreshold");
 				w.SoundThreshType = EditorPrefs.GetInt("Watchdog_Slot"+w.Slot+"_SoundThreshType");
 				w.VibraActive = EditorPrefs.GetBool("Watchdog_Slot"+w.Slot+"_VibraActive");         
@@ -159,108 +141,7 @@ public class WatchdogConfiguration : MonoBehaviour
 
 		}
 	}
-
-	// private bool AddPropertyWatcher(string property) 
-	// {
-	// 	if (instance.watchers != null) {
-	// 		bool ok = IsValidProperty(property); 
-	// 		bool cont = !ConfigContainsWatcher(property);
-	// 		if (ok && cont) {
-	// 			int newSlot = instance.watchers.Count+1;
-	// 			PropertyWatcher pw = new PropertyWatcher(newSlot, property);
-	// 			pw.Index = ProfilerPropertiesGetIndexOf(property)+1;
-	// 			instance.watchers.Add(pw);
-	// 		} else {
-	// 			throw new System.ArgumentException("invalid Property added to configuration.");
-	// 		}
-	// 		return ok;
-	// 	} else {
-	// 		throw new System.InvalidOperationException("no config found.");
-	// 	}
-	// }
-
-	// public void ExportConfig() 
-	// {
-	// 	BinaryFormatter formatter = new BinaryFormatter();
-	// 	FileStream file = File.Create(Application.persistentDataPath + "/config.dat");
-
-	// 	formatter.Serialize(file, watchers);
-	// 	file.Close();
-	// }
-
-	// public void ImportConfig() 
-	// {
-	// 	if (File.Exists(Application.persistentDataPath + "/config.dat")) {
-	// 		BinaryFormatter formatter = new BinaryFormatter();
-	// 		FileStream file = File.Open(Application.persistentDataPath + "config.dat", FileMode.Open);
-			
-	// 		List<PropertyWatcher> loadedWatchers =  (List<PropertyWatcher>)formatter.Deserialize(file);
-	// 		file.Close();
-
-	// 		watchers = loadedWatchers;
-	// 	}	
-	// }
-
-
-	// private int ProfilerPropertiesGetIndexOf(string property) 
-	// {
-	// 	for (int i = 0; i < profilerProperties.Length; i++) {
-	// 		if (property.Equals(profilerProperties[i])){
-	// 			return i;
-	// 		}
-	// 	}
-	// 	throw new ArgumentException("Invalid Property");
-	// }
-
-	// public bool HasEntries() 
-	// {
-	// 	return instance.watchers != null && watchers.Length > 0;
-
-	// }
-
-	// bool IsValidProperty(string s) 
-	// {
-	// 	bool result = false;
-	// 	foreach (string property in profilerProperties) {
-	// 		if(s.Equals(property)) {
-	// 			result = true;
-	// 		}
-	// 	}
-	// 	return result;
-	// }
-
-	// bool ConfigContainsWatcher(string s) 
-	// {
-	// 	foreach (PropertyWatcher watcher in instance.watchers) {
-	// 		if (s.Equals(watcher.Property)) {
-	// 			return true;
-	// 		}
-	// 	}
-	// 	return false;
-	// }
-	
 }
-
-// [Serializable]
-// public class PropertyWatcherList : ScriptableObject {
-
-// 	[SerializeField]
-// 	private List<PropertyWatcher> watchers;	
-// 	public List<PropertyWatcher> Watchers	
-
-// 	{
-// 		get 
-// 		{ 
-// 			return watchers;
-// 		} 
-
-// 		set 
-// 		{ 
-// 			watchers = value;
-// 		} 
-// 	}
-
-// }
 
 [Serializable]
 public class PropertyWatcher {

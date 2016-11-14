@@ -15,7 +15,7 @@ public class WatchdogConfigInspector : Editor {
 
 
 	public override void OnInspectorGUI() {
-		WatchdogConfiguration watchdog = (WatchdogConfiguration)target;
+		WatchdogConfiguration config = (WatchdogConfiguration)target;
 		
 		EditorGUILayout.Space();
 		EditorGUILayout.LabelField("Profiler Properties", EditorStyles.boldLabel);
@@ -27,12 +27,12 @@ public class WatchdogConfigInspector : Editor {
 		int toggleSpace = 25; 
 
 		int count = 0;
-		foreach (PropertyWatcher watcher in watchdog.Watchers) {
+		foreach (PropertyWatcher watcher in config.Watchers) {
 
 			// GUILayoutOption[] options = new GUILayoutOption[]{ GUILayout.MinWidth(100), GUILayout.};
-			watcher.Index = EditorGUILayout.Popup("Slot "+watcher.Slot, watcher.Index, watchdog.ProfilerPropertiesFormatted);
+			watcher.Index = EditorGUILayout.Popup("Slot "+watcher.Slot, watcher.Index, config.ProfilerPropertiesFormatted);
 			if (watcher.Index > 0) {
-				watcher.Property = watchdog.ProfilerProperties[watcher.Index-1];
+				watcher.Property = config.ProfilerProperties[watcher.Index-1];
 			}
 			
 			options = new GUILayoutOption[]{ GUILayout.ExpandWidth(false)};
@@ -40,12 +40,12 @@ public class WatchdogConfigInspector : Editor {
 
 			// EditorGUILayout.BeginHorizontal();
 			// GUILayout.Label();
-			EditorGUILayout.LabelField("Current Value:", "65 ms");	
+			// EditorGUILayout.LabelField("Current Value:", "65 ms");	
 			// EditorGUILayout.EndHorizontal();			
 		
 			// EditorGUILayout.BeginHorizontal();		
 			// GUILayout.Label();
-			EditorGUILayout.LabelField("Max Value", "65 ms");
+			// EditorGUILayout.LabelField("Max Value", "65 ms");
 			// EditorGUILayout.EndHorizontal();			
 
 			EditorGUI.indentLevel++;
@@ -89,7 +89,7 @@ public class WatchdogConfigInspector : Editor {
 		}
 
 		if (GUILayout.Button("Reset Configurration (All settings will be lost)")) {
-			watchdog.clearPrefs();
+			config.clearPrefs();
 		}
 				
 		//Save??
@@ -106,8 +106,7 @@ public class WatchdogConfigInspector : Editor {
 		//  }
 
 		if (GUI.changed) {
-			Debug.Log(watchdog);
-			watchdog.SavePrefs();
+			config.SavePrefs();
 			// EditorUtility.SetDirty(config);
 		}
 
