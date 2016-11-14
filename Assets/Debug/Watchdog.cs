@@ -7,6 +7,19 @@ using System.Globalization;
 using System.Collections;
 using System.Text.RegularExpressions;
 
+
+[InitializeOnLoad]
+public class Startup {
+	static Startup() {
+		if (EditorPrefs.GetBool("Watchdog_Enable")) {
+			if (GameObject.Find("Watchdog") == null) {
+				GameObject watchdog = new GameObject("Watchdog");
+				watchdog.AddComponent<Watchdog>().Init();
+			}		
+		}
+	}
+}
+
 [Serializable]
 public class Watchdog: MonoBehaviour {
 
@@ -25,26 +38,22 @@ public class Watchdog: MonoBehaviour {
 	string[] propertiesToTransmit;
 
 	[SerializeField]
-	private static WatchdogConfiguration config;
+	private WatchdogConfiguration config;
+	// private static PropertyWatcherList config;
 
-	[SerializeField]
-	private static GameObject watchdog;
 	
 	[SerializeField]
-	public static void Init() {
+	public void Init() {
+		config = WatchdogConfiguration.Instance;
+		Debug.Log(config.Watchers);
+		config.LoadPrefs();
 
-			if (GameObject.Find("Watchdog") == null) {
-				watchdog = new GameObject("Watchdog");
-				watchdog.AddComponent<Watchdog>();
-
-			}
-
-			config = WatchdogConfiguration.Instance;
-			config.LoadPrefs();
 	}
 
 	private void Reset() {
-
+		// config.LoadPrefs();
+		// config = WatchdogConfiguration.Instance;
+		// Debug.Log(config);
 
 	}
 
@@ -58,13 +67,13 @@ public class Watchdog: MonoBehaviour {
 	private void Start() {
 		PrepareTransmission();
 		StartCoroutine(Frame());
+
 	}
 
 
 
 	private IEnumerator Frame() {
 		for(;;){
-
 			// Capture frame-per-second
 			int lastFrameCount = Time.frameCount;
 			float lastTime = Time.realtimeSinceStartup;
@@ -76,7 +85,6 @@ public class Watchdog: MonoBehaviour {
 					SendOSCData(watcher);	
 				}
 			}
-
 		}
 	}
 
@@ -88,6 +96,9 @@ public class Watchdog: MonoBehaviour {
 	}
 
 	private void SendOSCData(PropertyWatcher watcher) {
+		int i = ProfilerDriver.GetPreviousFrameIndex(0);
+		string s = ProfilerDriver.GetOverviewText(ProfilerArea.CPU, i);
+
 		data = new float[buffersize];
 		float maxValue = 0;
 

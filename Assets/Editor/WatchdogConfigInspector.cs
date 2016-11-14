@@ -15,7 +15,7 @@ public class WatchdogConfigInspector : Editor {
 
 
 	public override void OnInspectorGUI() {
-		WatchdogConfiguration config = (WatchdogConfiguration)target;
+		WatchdogConfiguration watchdog = (WatchdogConfiguration)target;
 		
 		EditorGUILayout.Space();
 		EditorGUILayout.LabelField("Profiler Properties", EditorStyles.boldLabel);
@@ -26,14 +26,13 @@ public class WatchdogConfigInspector : Editor {
 		int spaceAfterCol1 = 0;
 		int toggleSpace = 25; 
 
-
 		int count = 0;
-		foreach (PropertyWatcher watcher in config.Watchers) {
+		foreach (PropertyWatcher watcher in watchdog.Watchers) {
 
 			// GUILayoutOption[] options = new GUILayoutOption[]{ GUILayout.MinWidth(100), GUILayout.};
-			watcher.Index = EditorGUILayout.Popup("Slot "+watcher.Slot, watcher.Index, config.ProfilerPropertiesFormatted);
+			watcher.Index = EditorGUILayout.Popup("Slot "+watcher.Slot, watcher.Index, watchdog.ProfilerPropertiesFormatted);
 			if (watcher.Index > 0) {
-				watcher.Property = config.ProfilerProperties[watcher.Index-1];
+				watcher.Property = watchdog.ProfilerProperties[watcher.Index-1];
 			}
 			
 			options = new GUILayoutOption[]{ GUILayout.ExpandWidth(false)};
@@ -86,8 +85,11 @@ public class WatchdogConfigInspector : Editor {
 			EditorGUI.indentLevel--;
 
 			EditorGUILayout.Separator();
-
 				// EditorGUILayout.EndHorizontal();				
+		}
+
+		if (GUILayout.Button("Reset Configurration (All settings will be lost)")) {
+			watchdog.clearPrefs();
 		}
 				
 		//Save??
@@ -104,7 +106,8 @@ public class WatchdogConfigInspector : Editor {
 		//  }
 
 		if (GUI.changed) {
-			config.SavePrefs();
+			Debug.Log(watchdog);
+			watchdog.SavePrefs();
 			// EditorUtility.SetDirty(config);
 		}
 

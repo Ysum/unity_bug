@@ -7,8 +7,6 @@ using UnityEditorInternal;
 // using System.IO;
 
 
-
-
 [Serializable]
 public class WatchdogConfiguration : MonoBehaviour 
 {
@@ -32,37 +30,66 @@ public class WatchdogConfiguration : MonoBehaviour
 		}
 	}
 
+	// private PropertyWatcherList config;
+	// public PropertyWatcherList Config
+	// {
+	// 	get 
+	// 	{
+	// 		LoadPrefs();
+	// 		return config;
+	// 	}
+	// }
+	
 	[SerializeField]
-	private List<PropertyWatcher> watchers;
-	public List<PropertyWatcher> Watchers 
+	private PropertyWatcher[] watchers;	
+	public PropertyWatcher[] Watchers 
 	{
 		get 
 		{
 			return watchers;
 		}
 	}
-	
-	// singleton 
+
+
 	[SerializeField]
 	private static WatchdogConfiguration instance = null;
 	public static WatchdogConfiguration Instance 
 	{
 		get 
 		{	
-//			if (instance == null) {
-//				instance = (WatchdogConfiguration)FindObjectOfType(typeof(WatchdogConfiguration));
-				if (instance == null) {
-					instance = GameObject.Find("Watchdog").AddComponent<WatchdogConfiguration>();
-					instance.FetchProfilerProperties();
-					instance.InitializeConfiguration();
-				}
-				
-//			}
+			GameObject watchdog = GameObject.Find("Watchdog");
+			instance = (WatchdogConfiguration) watchdog.GetComponent(typeof(WatchdogConfiguration));
+			// instance = (WatchdogConfiguration)FindObjectOfType(typeof(WatchdogConfiguration));
+
+
+			//create if doesn't exist
+			if (instance == null) {
+				instance = watchdog.AddComponent<WatchdogConfiguration>();
+				// instance = ScriptableObject.CreateInstance<WatchdogConfiguration>();
+				instance.FetchProfilerProperties();
+				instance.InitializeConfiguration();
+			}
+
+			instance.LoadPrefs();
+			
 			return instance;
 		}
 	}
 
-	public void SavePrefs() {
+	// void Reset() {
+	// 	if (config == null) {
+	// 		config = ScriptableObject.CreateInstance<PropertyWatcherList>();
+	// 	}
+	// }
+
+	public void clearPrefs() 
+	{
+		instance.watchers = null;
+		instance.InitializeConfiguration();
+	}
+
+	public void SavePrefs() 
+	{
 		foreach (PropertyWatcher w in watchers) {
 			// if (w.Index > 0) {
 				EditorPrefs.SetString("Watchdog_Slot"+w.Slot+"_Property", w.Property);
@@ -77,7 +104,8 @@ public class WatchdogConfiguration : MonoBehaviour
 			// }	
 		} 
 	}
-
+	
+	[SerializeField]
 	public void LoadPrefs() {
 		foreach (PropertyWatcher w in watchers) {
 			//  if (w.Index > 0) {
@@ -103,8 +131,8 @@ public class WatchdogConfiguration : MonoBehaviour
 		ProfilerArea[] areas = (ProfilerArea[])Enum.GetValues(typeof(ProfilerArea));
 
 		profilerProperties = new string[allProfilerProperties.Length];  
-		profilerPropertiesFormatted = new string[allProfilerProperties.Length+1];  
-		
+		profilerPropertiesFormatted = new string[allProfilerProperties.Length+1]; 
+
 		int index = 0;
 		foreach(ProfilerArea a in areas) {
 			if (a != ProfilerArea.AreaCount) {
@@ -121,36 +149,35 @@ public class WatchdogConfiguration : MonoBehaviour
 	public void InitializeConfiguration() 
 	{
 
-		if (watchers == null) {
-			watchers = new List<PropertyWatcher>();
+		if (instance.watchers == null) {
+			instance.watchers = new PropertyWatcher[10];
 
 			for (int i = 1; i <= 10; i++) {
-				PropertyWatcher pw = new PropertyWatcher();
-				pw.Slot = i;
-				watchers.Add(pw);
+				PropertyWatcher pw = new PropertyWatcher(i);
+				instance.watchers[i-1] = pw;
 			}
 
 		}
 	}
 
-	private bool AddPropertyWatcher(string property) 
-	{
-		if (watchers != null) {
-			bool ok = IsValidProperty(property); 
-			bool cont = !ConfigContainsWatcher(property);
-			if (ok && cont) {
-				PropertyWatcher pw = new PropertyWatcher(property);
-				pw.Slot = watchers.Count+1;
-				pw.Index = ProfilerPropertiesGetIndexOf(property)+1;
-				this.watchers.Add(pw);
-			} else {
-				throw new System.ArgumentException("invalid Property added to configuration.");
-			}
-			return ok;
-		} else {
-			throw new System.InvalidOperationException("no config found.");
-		}
-	}
+	// private bool AddPropertyWatcher(string property) 
+	// {
+	// 	if (instance.watchers != null) {
+	// 		bool ok = IsValidProperty(property); 
+	// 		bool cont = !ConfigContainsWatcher(property);
+	// 		if (ok && cont) {
+	// 			int newSlot = instance.watchers.Count+1;
+	// 			PropertyWatcher pw = new PropertyWatcher(newSlot, property);
+	// 			pw.Index = ProfilerPropertiesGetIndexOf(property)+1;
+	// 			instance.watchers.Add(pw);
+	// 		} else {
+	// 			throw new System.ArgumentException("invalid Property added to configuration.");
+	// 		}
+	// 		return ok;
+	// 	} else {
+	// 		throw new System.InvalidOperationException("no config found.");
+	// 	}
+	// }
 
 	// public void ExportConfig() 
 	// {
@@ -175,44 +202,65 @@ public class WatchdogConfiguration : MonoBehaviour
 	// }
 
 
-	private int ProfilerPropertiesGetIndexOf(string property) 
-	{
-		for (int i = 0; i < profilerProperties.Length; i++) {
-			if (property.Equals(profilerProperties[i])){
-				return i;
-			}
-		}
-		throw new ArgumentException("Invalid Property");
-	}
+	// private int ProfilerPropertiesGetIndexOf(string property) 
+	// {
+	// 	for (int i = 0; i < profilerProperties.Length; i++) {
+	// 		if (property.Equals(profilerProperties[i])){
+	// 			return i;
+	// 		}
+	// 	}
+	// 	throw new ArgumentException("Invalid Property");
+	// }
 
-	public bool HasEntries() 
-	{
-		return watchers != null && watchers.Count > 0;
+	// public bool HasEntries() 
+	// {
+	// 	return instance.watchers != null && watchers.Length > 0;
 
-	}
+	// }
 
-	bool IsValidProperty(string s) 
-	{
-		bool result = false;
-		foreach (string property in profilerProperties) {
-			if(s.Equals(property)) {
-				result = true;
-			}
-		}
-		return result;
-	}
+	// bool IsValidProperty(string s) 
+	// {
+	// 	bool result = false;
+	// 	foreach (string property in profilerProperties) {
+	// 		if(s.Equals(property)) {
+	// 			result = true;
+	// 		}
+	// 	}
+	// 	return result;
+	// }
 
-	bool ConfigContainsWatcher(string s) 
-	{
-		foreach (PropertyWatcher watcher in watchers) {
-			if (s.Equals(watcher.Property)) {
-				return true;
-			}
-		}
-		return false;
-	}
+	// bool ConfigContainsWatcher(string s) 
+	// {
+	// 	foreach (PropertyWatcher watcher in instance.watchers) {
+	// 		if (s.Equals(watcher.Property)) {
+	// 			return true;
+	// 		}
+	// 	}
+	// 	return false;
+	// }
 	
 }
+
+// [Serializable]
+// public class PropertyWatcherList : ScriptableObject {
+
+// 	[SerializeField]
+// 	private List<PropertyWatcher> watchers;	
+// 	public List<PropertyWatcher> Watchers	
+
+// 	{
+// 		get 
+// 		{ 
+// 			return watchers;
+// 		} 
+
+// 		set 
+// 		{ 
+// 			watchers = value;
+// 		} 
+// 	}
+
+// }
 
 [Serializable]
 public class PropertyWatcher {
@@ -248,8 +296,22 @@ public class PropertyWatcher {
 	}
 
 	[SerializeField]
-	public int Slot { get; set; }
-	
+	private int slot; 
+	public int Slot 
+	{ 
+		get 
+		{
+			return slot;
+		} 
+		
+		set 
+		{
+			slot = value;
+
+		}
+	}
+
+	[SerializeField]	
 	private bool soundActive;
 	public bool SoundActive 
 	{ 
@@ -263,19 +325,7 @@ public class PropertyWatcher {
 			} 
 		}
 
-	// private float soundFreq;
-	// public float SoundFreq 
-	// { 
-	// 	get 
-	// 	{
-	// 		return soundFreq;
-	// 	} 
-	// 	set
-	// 	{
-	// 		soundFreq = value;
-	// 	} 
-	// }
-
+	[SerializeField]
 	private int soundNote;
 	public int SoundNote 
 	{ 
@@ -289,6 +339,7 @@ public class PropertyWatcher {
 		} 
 	}
 
+	[SerializeField]
 	private float soundThreshold;
 	public float SoundThreshold 
 	{ 
@@ -302,6 +353,7 @@ public class PropertyWatcher {
 		} 
 	}
 	
+	[SerializeField]
 	private int soundThreshType;
 	public int SoundThreshType 
 	{ 
@@ -315,6 +367,7 @@ public class PropertyWatcher {
 		} 
 	}
     
+	[SerializeField]
 	private bool vibraActive;
 	public bool VibraActive 
 	{ 
@@ -328,6 +381,7 @@ public class PropertyWatcher {
 		} 
 	}
 
+	[SerializeField]
 	private float vibraThreshold;
 	public float VibraThreshold 
 	{ 
@@ -341,6 +395,7 @@ public class PropertyWatcher {
 		} 
 	}
 
+	[SerializeField]
 	private int vibraThreshType;
 	public int VibraThreshType 
 	{ 
@@ -354,22 +409,23 @@ public class PropertyWatcher {
 		} 
 	}
 
-		// default constructor
-		public PropertyWatcher() {
-			SoundActive = false;
-			// SoundFreq = 0;
-			SoundThreshold = 0;
-			SoundThreshType = 0; // 0: alarm above or 1: below threshold
-			
-			VibraActive = false;
-			VibraThreshold = 0;
-			VibraThreshType = 0; // 0: alarm above or 1: below threshold
-		}
+	// default constructor
+	public PropertyWatcher(int slot) {
+		Slot = slot;
+		SoundActive = false;
+		// SoundFreq = 0;
+		SoundThreshold = 0;
+		SoundThreshType = 0; // 0: alarm above or 1: below threshold
 		
-		// string property constructor
-		public PropertyWatcher(string property) : this() {
-			Property = Property;
+		VibraActive = false;
+		VibraThreshold = 0;
+		VibraThreshType = 0; // 0: alarm above or 1: below threshold
+	}
+	
+	// string property constructor
+	public PropertyWatcher(int slot, string property) : this(slot) {
+		Property = Property;
 
-		}
+	}
 
 }

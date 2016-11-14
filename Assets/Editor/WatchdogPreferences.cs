@@ -1,18 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
 
-[InitializeOnLoad]
-public class Startup {
-	static Startup() {
-		if (EditorPrefs.GetBool("Watchdog_Enable")) {
-			Watchdog.Init();
-		
-		}
-		// Debug.Log("Start!");
-
-	}
-
-}
 
 public class WatchdogPreferences : MonoBehaviour {
     private static bool prefsLoaded = false;
@@ -51,7 +39,10 @@ public class WatchdogPreferences : MonoBehaviour {
 			if (!enable) {
 				DestroyImmediate(GameObject.Find("Watchdog"));
 			} else {
-				Watchdog.Init();
+				if (GameObject.Find("Watchdog") == null) {
+					GameObject watchdog = new GameObject("Watchdog");
+					watchdog.AddComponent<Watchdog>().Init();
+			}	
 			}
 		}
 		
